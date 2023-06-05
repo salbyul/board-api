@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.board.repository.BoardMapper">
+    <select id="findAllCategoryNames" resultType="String">
+        SELECT name
+        FROM category;
+    </select>
+
+    <select id="findBoardDTOsBySearchCondition" resultType="com.study.board.dto.BoardDTO">
+        SELECT b.board_id AS boardId,
+        c.name AS category,
+        b.writer,
+        b.title,
+        b.views,
+        b.created_date AS generationTimestamp,
+        b.modified_date AS modificationTimestamp,
+        count(f.board_id) AS fileCount
+        FROM board b
+        LEFT JOIN category c
+        ON c.category_id = b.category_id
+        LEFT JOIN file f
+        ON f.board_id = b.board_id
+        <![CDATA[WHERE b.created_date >= #{startDate} AND b.created_date <= #{endDate}]]>
+        <if test="search != null">
+            AND (b.title LIKE CONCAT('%', #{search}, '%') OR
+            b.writer LIKE CONCAT('%', #{search}, '%') OR
+            b.content LIKE CONCAT('%', #{search}, '%'))
+        </if>
+        <if test="category != null">
+            <if test="category != 'all'">
+                AND c.name = #{category}
+            </if>
+        </if>
+        GROUP BY b.board_id, c.name, b.writer, b.title, b.views, b.created_date, b.modified_date
+        ORDER BY b.board_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countBySearchCondition" resultType="Integer">
+        SELECT COUNT(board_id)
+        FROM board b
+        <![CDATA[WHERE b.created_date >= #{startDate} AND b.created_date <= #{endDate}]]>
+        <if test="search != null">
+            AND (b.title LIKE CONCAT('%', #{search}, '%') OR
+            b.writer LIKE CONCAT('%', #{search}, '%') OR
+            b.content LIKE CONCAT('%', #{search}, '%'))
+        </if>
+        <if test="category != null">
+            <if test="category != 'all'">
+                AND b.category_id = (SELECT category_id FROM category WHERE name = #{name})
+            </if>
+        </if>
+    </select>
+</mapper>
