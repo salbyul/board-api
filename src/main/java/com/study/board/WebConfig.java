@@ -1,5 +1,6 @@
 package com.study.board;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -18,5 +19,15 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:5173")
                 .allowedMethods("*")
                 .maxAge(3600);
+    }
+
+    /**
+     * SHA256Encoder Bean으로 등록
+     *
+     * @return
+     */
+    @Bean
+    public SHA256Encoder sha256Encoder() {
+        return new SHA256Encoder();
     }
 }
