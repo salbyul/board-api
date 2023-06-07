@@ -3,7 +3,7 @@ package com.study.board.response;
 import lombok.Getter;
 
 /**
- * TODO CLEAN CODE: 더럽다, 실제로 ErrorResponse를 전송할 때 static Field까지 전부 전송된다.
+ * TODO CLEAN CODE: 더럽다.
  */
 @Getter
 public class ErrorResponse {
@@ -16,27 +16,34 @@ public class ErrorResponse {
      * xx4 : Pattern
      */
     public static final String CATEGORY_POSITIVE = "Category Positive";
-    private final Integer CATEGORY_POSITIVE_CODE = 101;
+    private static final Integer CATEGORY_POSITIVE_CODE = 101;
     public static final String CATEGORY_NULL = "Category Null";
-    private final Integer CATEGORY_NULL_CODE = 102;
+    private static final Integer CATEGORY_NULL_CODE = 102;
     public static final String WRITER_NULL = "Writer Null";
-    private final Integer WRITER_NULL_CODE = 202;
+    private static final Integer WRITER_NULL_CODE = 202;
     public static final String WRITER_SIZE = "Writer Size";
-    private final Integer WRITER_SIZE_CODE = 203;
+    private static final Integer WRITER_SIZE_CODE = 203;
     public static final String TITLE_NULL = "Title Null";
-    private final Integer TITLE_NULL_CODE = 302;
+    private static final Integer TITLE_NULL_CODE = 302;
     public static final String TITLE_SIZE = "Title Size";
-    private final Integer TITLE_SIZE_CODE = 303;
+    private static final Integer TITLE_SIZE_CODE = 303;
     public static final String PASSWORD_NULL = "Password Null";
-    private final Integer PASSWORD_NULL_CODE = 402;
+    private static final Integer PASSWORD_NULL_CODE = 402;
     public static final String PASSWORD_SIZE = "Password Size";
-    private final Integer PASSWORD_SIZE_CODE = 403;
+    private static final Integer PASSWORD_SIZE_CODE = 403;
     public static final String PASSWORD_PATTERN = "Password Pattern";
-    private final Integer PASSWORD_PATTERN_CODE = 404;
+    private static final Integer PASSWORD_PATTERN_CODE = 404;
+    public static final String PASSWORD_PASSWORD_NOT_EQUAL = "Password Not Equal";
+    private static final Integer PASSWORD_PASSWORD_NOT_EQUAL_CODE = 405;
     public static final String CONTENT_NULL = "Content Null";
-    private final Integer CONTENT_NULL_CODE = 502;
+    private static final Integer CONTENT_NULL_CODE = 502;
     public static final String CONTENT_SIZE = "Content Size";
-    private final Integer CONTENT_SIZE_CODE = 503;
+    private static final Integer CONTENT_SIZE_CODE = 503;
+    public static final String FILE_NULL = "File Null";
+    public static final Integer FILE_NULL_CODE = 602;
+    public static final String FILE_NAME_NULL = "File Null Name";
+    public static final Integer FILE_NAME_NULL_CODE = 612;
+
 
     private final int errorCode;
     private final String errorMessage;
@@ -81,6 +88,15 @@ public class ErrorResponse {
                 break;
             case CONTENT_SIZE:
                 this.errorCode = CONTENT_SIZE_CODE;
+                break;
+            case FILE_NULL:
+                this.errorCode = FILE_NULL_CODE;
+                break;
+            case FILE_NAME_NULL:
+                this.errorCode = FILE_NAME_NULL_CODE;
+                break;
+            case PASSWORD_PASSWORD_NOT_EQUAL:
+                this.errorCode = PASSWORD_PASSWORD_NOT_EQUAL_CODE;
                 break;
             default:
                 errorCode = 0;

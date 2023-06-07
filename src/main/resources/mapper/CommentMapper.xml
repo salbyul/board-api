@@ -2,5 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.study.board.mapper.CommentMapper">
+<mapper namespace="com.study.board.repository.CommentMapper">
+    <select id="findDetailByBoardId" resultType="com.study.board.dto.CommentDTO">
+        SELECT comment_id AS commentId, writer, content, created_date AS generationTimestamp
+        FROM comment
+        WHERE board_id = #{boardId}
+    </select>
 </mapper>

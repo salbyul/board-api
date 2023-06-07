@@ -5,7 +5,8 @@ import com.study.board.domain.Category;
 import com.study.board.dto.BoardDTO;
 import com.study.board.dto.SearchCondition;
 import com.study.board.repository.BoardRepository;
-import com.study.board.response.BoardListResponse;
+import com.study.board.repository.FileRepository;
+import com.study.board.response.board.BoardListResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class BoardService {
      */
     public BoardListResponse getBoardList(SearchCondition condition) {
         List<String> categoryNames = getCategoryNames();
-        List<BoardDTO> boardDTOs = boardRepository.findBoardDTOsBySearchCondition(condition);
+        List<BoardDTO> boardDTOs = boardRepository.findSmallBySearchCondition(condition);
         Integer boardCounts = boardRepository.countBySearchCondition(condition);
 
         return new BoardListResponse(categoryNames, boardDTOs, boardCounts);
@@ -67,5 +68,42 @@ public class BoardService {
 
         boardRepository.save(boardCreateDTO);
         return boardCreateDTO.getBoardId();
+    }
+
+    /**
+     * Board의 Primary Key를 이용해 디테일 페이지에 표현할 데이터를 담은 BoardDTO 객체를 리턴한다.
+     *
+     * @param boardId Board의 Primary Key
+     * @return BoardDTO
+     */
+    public BoardDTO getBoardDetail(Long boardId) {
+        return boardRepository.findDetailByBoardId(boardId);
+    }
+
+    /**
+     * Board의 views를 1 증가시킨다.
+     *
+     * @param boardId Board의 Primary Key
+     */
+    public void updateViews(Long boardId) {
+        boardRepository.addOneToViews(boardId);
+    }
+
+    /**
+     * 비밀번호를 확인해 같은 경우에 Board를 DB에서 제거한다.
+     * 같지 않은 경우에는 IllegalArgumentException을 발생시킨다.
+     *
+     * @param boardId  Board의 Primary Key
+     * @param password 사용자가 입력한 password
+     * @throws NoSuchAlgorithmException
+     */
+    public void deleteBoard(Long boardId, String password) throws NoSuchAlgorithmException {
+        String encryptedPassword = sha256Encoder.encrypt(password);
+        String foundPassword = boardRepository.findPasswordByBoardId(boardId);
+        if (!encryptedPassword.equals(foundPassword)) {
+            throw new IllegalArgumentException("Password Not Equal");
+        }
+
+        boardRepository.deleteByBoardId(boardId);
     }
 }

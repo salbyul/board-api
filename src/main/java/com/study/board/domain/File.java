@@ -1,6 +1,7 @@
 package com.study.board.domain;
 
-//TODO java.io.File 이랑 같은 이름이라 헷갈린다. Rename?
+//TODO java.io.File 과 같은 이름이라 헷갈린다. Rename?
+
 /**
  * Table: file
  */
@@ -10,7 +11,7 @@ public class File {
     private Long fileId;
 
     //    Column name: name
-    private String name;
+    private String fileName;
 
     //    Column name: real_name
     private String realName;

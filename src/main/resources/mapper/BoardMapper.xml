@@ -8,7 +8,7 @@
         FROM category;
     </select>
 
-    <select id="findBoardDTOsBySearchCondition" resultType="com.study.board.dto.BoardDTO">
+    <select id="findSmallBySearchCondition" resultType="com.study.board.dto.BoardDTO">
         SELECT b.board_id AS boardId,
         c.name AS category,
         b.writer,
@@ -35,7 +35,7 @@
         </if>
         GROUP BY b.board_id, c.name, b.writer, b.title, b.views, b.created_date, b.modified_date
         ORDER BY b.board_id DESC
-        LIMIT #{limit} OFFSET #{offset}
+        LIMIT #{limit} OFFSET #{page}
     </select>
 
     <select id="countBySearchCondition" resultType="Integer">
@@ -60,7 +60,39 @@
     </select>
 
     <insert id="save" useGeneratedKeys="true" keyProperty="boardId">
-        INSERT INTO board (category_id, writer, title, password, content, generationTimestamp, views)
+        INSERT INTO board (category_id, writer, title, password, content, created_date, views)
         VALUES (#{categoryId}, #{writer}, #{title}, #{password}, #{content}, #{generationTimestamp}, 0)
     </insert>
+
+    <select id="findDetailByBoardId" resultType="com.study.board.dto.BoardDTO">
+        SELECT c.name          AS category,
+               b.title,
+               b.writer,
+               b.content,
+               b.views,
+               b.created_date  AS generationTimestamp,
+               b.modified_date AS modificationTimestamp
+        FROM board b
+                 LEFT JOIN category c
+                           ON c.category_id = b.category_id
+        WHERE board_id = #{boardId}
+    </select>
+
+    <update id="addOneToViews">
+        UPDATE board
+        SET views = views + 1
+        WHERE board_id = #{board_id}
+    </update>
+
+    <select id="findPasswordByBoardId" resultType="String">
+        SELECT password
+        FROM board
+        WHERE board_id = #{boardId}
+    </select>
+
+    <delete id="deleteByBoardId">
+        DELETE
+        FROM board
+        WHERE board_id = #{boardId}
+    </delete>
 </mapper>

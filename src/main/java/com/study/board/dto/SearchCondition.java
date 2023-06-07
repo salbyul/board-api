@@ -2,6 +2,7 @@ package com.study.board.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -11,9 +12,10 @@ import java.time.LocalDate;
  */
 @Getter
 @Setter
+@ToString
 public class SearchCondition {
 
-    private Integer offset;
+    private Integer page;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
     @DateTimeFormat(pattern = "yyyy-MM-dd")

@@ -1,4 +1,4 @@
-package com.study.board.response;
+package com.study.board.response.board;
 
 import com.study.board.dto.BoardDTO;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class BoardListResponse {
+public class BoardListResponse implements BoardResponse {
 
     private List<String> categoryNames;
     private List<BoardDTO> boardDTOs;
