@@ -5,6 +5,7 @@ import com.study.board.dto.CommentDTO;
 import com.study.board.dto.SearchCondition;
 import com.study.board.response.board.BoardCreateResponse;
 import com.study.board.response.board.BoardDetailResponse;
+import com.study.board.response.board.BoardModifyResponse;
 import com.study.board.response.board.BoardResponse;
 import com.study.board.service.BoardService;
 import com.study.board.service.CommentService;
@@ -55,7 +56,7 @@ public class BoardController {
     }
 
     @PutMapping("/create")
-    public BoardResponse createBoard(@Validated @RequestPart("boardCreateDTO") BoardCreateDTO boardCreateDTO, @RequestPart(value = "files", required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
+    public BoardResponse createBoard(@Validated @RequestPart("boardCreateDTO") BoardCreateDTO boardCreateDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
         Long boardId = boardService.saveBoard(boardCreateDTO);
         fileService.saveFiles(files, boardId);
         return new BoardCreateResponse(boardId);
@@ -79,9 +80,46 @@ public class BoardController {
         return new BoardDetailResponse(boardDetail);
     }
 
+    /**
+     * password를 확인 후 맞으면 boardId를 Primary Key로 갖고 있는 게시글을 삭제한다.
+     *
+     * @param boardId  Board의 Primary Key
+     * @param password 게시글 삭제를 위해 입력한 비밀번호
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
     @DeleteMapping("/delete/{boardId}")
     public ResponseEntity delete(@PathVariable Long boardId, String password) throws NoSuchAlgorithmException {
-        boardService.deleteBoard(boardId, password);
+        boardService.checkPassword(boardId, password);
+        boardService.deleteBoard(boardId);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/modify")
+    public BoardResponse checkPasswordForModification(Long boardId, String password) throws NoSuchAlgorithmException {
+        boardService.checkPassword(boardId, password);
+        String encryptedPassword = boardService.getEncryptedPassword(password);
+        return new BoardModifyResponse(encryptedPassword);
+    }
+
+    @GetMapping("/modify/{boardId}")
+    public BoardResponse getDTOForModification(@PathVariable Long boardId, String encryptedPassword) {
+        boardService.checkEncryptedPassword(boardId, encryptedPassword);
+        BoardDTO boardDTO = boardService.getDetailForModification(boardId);
+        return new BoardDetailResponse(boardDTO);
+    }
+
+    @PostMapping("/modify/{boardId}")
+    public BoardResponse modifyBoard(@PathVariable Long boardId, @Validated @RequestPart BoardModifyDTO boardModifyDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
+        boardService.checkPassword(boardId, boardModifyDTO.getPassword());
+        boardService.modifyBoard(boardId, boardModifyDTO);
+        fileService.removeFileByFileNames(boardModifyDTO.getFileNames(), boardId);
+        if (files != null) {
+            for (MultipartFile file : files) {
+                System.out.println("file.getOriginalFilename() = " + file.getOriginalFilename());
+            }
+        }
+        fileService.saveFiles(files, boardId);
+        return null;
     }
 }

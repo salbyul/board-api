@@ -95,4 +95,27 @@
         FROM board
         WHERE board_id = #{boardId}
     </delete>
+
+    <select id="findDetailForModificationByBoardId" resultType="com.study.board.dto.BoardDTO">
+        SELECT c.name          AS category,
+               b.created_date  AS generationTimestamp,
+               b.modified_date AS modificationTimestamp,
+               b.views,
+               b.writer,
+               b.title,
+               b.content
+        FROM board b
+                 LEFT JOIN category c
+                           ON c.category_id = b.category_id
+        WHERE b.board_id = #{boardId}
+    </select>
+
+    <update id="modifyBoardByBoardModifyDTO">
+        UPDATE board
+        SET writer        = #{boardModifyDTO.writer},
+            title         = #{boardModifyDTO.title},
+            content       = #{boardModifyDTO.content},
+            modified_date = #{boardModifyDTO.modificationTimestamp}
+        WHERE board_id = #{boardId}
+    </update>
 </mapper>

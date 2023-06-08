@@ -76,4 +76,21 @@ public interface BoardRepository {
      * @param boardId Board의 Primary Key
      */
     void deleteByBoardId(Long boardId);
+
+    /**
+     * Board의 Primary Key를 이용해 수정을 하기 위한 BoardDTO를 리턴한다.
+     *
+     * @param boardId Board의 Primary Key
+     * @return
+     */
+    BoardDTO findDetailForModificationByBoardId(Long boardId);
+
+
+    /**
+     * boardId를 Primary Key로 갖는 레코드의 값을 boardModifyDTO 객체를 이용하여 변경한다.
+     *
+     * @param boardModifyDTO 변경할 값이 담긴 객체
+     * @param boardId        변경할 레코드를 찾을 Primary Key
+     */
+    void modifyBoardByBoardModifyDTO(Long boardId, BoardModifyDTO boardModifyDTO);
 }

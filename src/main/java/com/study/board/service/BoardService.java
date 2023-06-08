@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.study.board.dto.BoardDTO.*;
@@ -22,6 +23,7 @@ import static com.study.board.dto.BoardDTO.*;
 public class BoardService {
 
     private final BoardRepository boardRepository;
+    private final FileRepository fileRepository;
     private final SHA256Encoder sha256Encoder;
 
     /**
@@ -90,20 +92,55 @@ public class BoardService {
     }
 
     /**
-     * 비밀번호를 확인해 같은 경우에 Board를 DB에서 제거한다.
-     * 같지 않은 경우에는 IllegalArgumentException을 발생시킨다.
+     * 해당 boardId를 Primary Key로 갖고 있는 게시글을 DB에서 제거한다.
      *
-     * @param boardId  Board의 Primary Key
-     * @param password 사용자가 입력한 password
+     * @param boardId Board의 Primary Key
      * @throws NoSuchAlgorithmException
      */
-    public void deleteBoard(Long boardId, String password) throws NoSuchAlgorithmException {
+    public void deleteBoard(Long boardId) {
+        boardRepository.deleteByBoardId(boardId);
+    }
+
+    public void checkEncryptedPassword(Long boardId, String encryptedPassword) {
+        String foundPassword = boardRepository.findPasswordByBoardId(boardId);
+        if (!foundPassword.equals(encryptedPassword)) throw new IllegalArgumentException("Password Not Equal");
+    }
+
+    public BoardDTO getDetailForModification(Long boardId) {
+        BoardDTO board = boardRepository.findDetailForModificationByBoardId(boardId);
+        List<String> fileNames = fileRepository.findRealName(boardId);
+        board.setFileNames(fileNames);
+        return board;
+    }
+
+    public String getEncryptedPassword(String password) throws NoSuchAlgorithmException {
+        return sha256Encoder.encrypt(password);
+    }
+
+    /**
+     * 유저가 입력한 비밀번호(password)와 DB에 저장된 비밀번호가 같은지 확인한다.
+     *
+     * @param password 유저가 입력한 비밀번호
+     * @param boardId  해당 글의 Primary Key
+     * @throws NoSuchAlgorithmException
+     */
+    public void checkPassword(Long boardId, String password) throws NoSuchAlgorithmException {
         String encryptedPassword = sha256Encoder.encrypt(password);
         String foundPassword = boardRepository.findPasswordByBoardId(boardId);
         if (!encryptedPassword.equals(foundPassword)) {
             throw new IllegalArgumentException("Password Not Equal");
         }
+    }
 
-        boardRepository.deleteByBoardId(boardId);
+    /**
+     * BoardModifyDTO 객체에 수정 시각을 현재 시각으로 설정하고,
+     * boardId를 Primary Key로 갖는 레코드의 값을 boardModifyDTO 객체를 이용하여 변경한다.
+     *
+     * @param boardModifyDTO 변경할 값이 담긴 객체
+     * @param boardId        변경할 레코드를 찾을 Primary Key
+     */
+    public void modifyBoard(Long boardId, BoardModifyDTO boardModifyDTO) {
+        boardModifyDTO.setModificationTimestamp(LocalDateTime.now());
+        boardRepository.modifyBoardByBoardModifyDTO(boardId, boardModifyDTO);
     }
 }

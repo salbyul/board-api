@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -135,5 +136,43 @@ public class FileService {
         return new FileInputStream(PATH + fileName);
     }
 
+    /**
+     * 제거될 File의 real_name들을 추리고 제거한다.
+     *
+     * @param fileNames 제거되지 않을 real_name 목록
+     * @param boardId   외래키로 갖는 값
+     */
+    public void removeFileByFileNames(List<String> fileNames, Long boardId) {
+        List<String> existFileNames = fileRepository.findRealName(boardId);
+        if (existFileNames.isEmpty()) return;
 
+        if (!fileNames.isEmpty()) {
+            List<String> listToRemove = selectToRemove(fileNames, existFileNames);
+            if (!listToRemove.isEmpty()) {
+                fileRepository.deleteFileByRealNameAndBoardId(listToRemove, boardId);
+            }
+        } else {
+            fileRepository.deleteByBoardId(boardId);
+        }
+    }
+
+    /**
+     * existFileNames에는 존재하지만 fileNames에는 존재하지 않는 이름들의 목록을 리턴한다.
+     *
+     * @param fileNames      제거되지 않을 이름 목록
+     * @param existFileNames 기존에 존재하는 이름 목록
+     * @return
+     */
+    private List<String> selectToRemove(List<String> fileNames, List<String> existFileNames) {
+        List<String> result = existFileNames.stream().collect(Collectors.toList());
+        for (String fileName : fileNames) {
+            for (String existFileName : result) {
+                if (existFileName.equals(fileName)) {
+                    result.remove(existFileName);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }

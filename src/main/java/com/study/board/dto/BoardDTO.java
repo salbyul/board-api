@@ -29,12 +29,8 @@ public class BoardDTO {
     private List<CommentDTO> commentDTOs;
     private Integer fileCounts;
 
-    public void setModificationTimestampToCurrentTime() {
-        this.modificationTimestamp = LocalDateTime.now();
-    }
-
     /**
-     * DB에 저장하기 위한 객체
+     * Board를 생성하기 위한 객체
      */
     @Getter
     @Setter
@@ -68,5 +64,31 @@ public class BoardDTO {
         public void setGenerationTimestampToCurrentTime() {
             this.generationTimestamp = LocalDateTime.now();
         }
+    }
+
+    /**
+     * Board를 수정하기 위한 객체
+     */
+    @Getter
+    @Setter
+    @ToString
+    public static class BoardModifyDTO {
+
+        @Size(min = 3, max = 4, message = "Writer Size")
+        @NotNull(message = "Writer Null")
+        private String writer;
+
+        private String password;
+
+        @Size(min = 4, max = 99, message = "Title Size")
+        @NotNull(message = "Title Null")
+        private String title;
+
+        @Size(min = 4, max = 1999, message = "Content Size")
+        @NotNull(message = "Content Null")
+        private String content;
+
+        private List<String> fileNames;
+        private LocalDateTime modificationTimestamp;
     }
 }

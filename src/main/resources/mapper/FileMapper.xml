@@ -21,4 +21,20 @@
         WHERE board_id = #{boardId}
           AND real_name = #{realName}
     </select>
+
+    <delete id="deleteFileByRealNameAndBoardId">
+        DELETE
+        FROM file
+        WHERE board_id = #{boardId}
+        AND real_name IN
+        <foreach collection="fileNames" item="fileName" index="index" open="(" close=")" separator=",">
+            #{fileName}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByBoardId">
+        DELETE
+        FROM file
+        WHERE board_id = #{boardId}
+    </delete>
 </mapper>
