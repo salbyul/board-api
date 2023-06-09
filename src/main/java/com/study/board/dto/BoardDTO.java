@@ -2,7 +2,6 @@ package com.study.board.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -13,8 +12,8 @@ import java.util.List;
 
 @Getter
 @Setter
-@ToString
 public class BoardDTO {
+
     private Long boardId;
     private String category;
     private Long categoryId;
@@ -34,7 +33,6 @@ public class BoardDTO {
      */
     @Getter
     @Setter
-    @ToString
     public static class BoardCreateDTO {
         private Long boardId;
 
@@ -71,7 +69,6 @@ public class BoardDTO {
      */
     @Getter
     @Setter
-    @ToString
     public static class BoardModifyDTO {
 
         @Size(min = 3, max = 4, message = "Writer Size")

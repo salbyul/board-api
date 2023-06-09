@@ -1,8 +1,8 @@
 package com.study.board.service;
 
 import com.study.board.dto.FileDTO;
-import com.study.board.repository.BoardRepository;
-import com.study.board.repository.FileRepository;
+import com.study.board.repository.board.BoardRepository;
+import com.study.board.repository.file.FileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,9 +14,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -113,17 +113,7 @@ public class FileService {
     }
 
     /**
-     * Board의 Primary Key를 외래키로 갖고 있는 레코드들의 real_name 값을 List 형태로 리턴한다.
-     *
-     * @param boardId Board의 Primary Key
-     * @return real_name List
-     */
-    public List<String> getFileRealNames(Long boardId) {
-        return fileRepository.findRealName(boardId);
-    }
-
-    /**
-     * FileDTO에 담긴 값을 이용해 name을 찾아 FileInputStream 객체를 생성해 리턴한다.
+     * FileDTO에 담긴 값을 이용해 DB에서 fileName을 찾아 해당 파일의 FileInputStream 객체를 생성해 리턴한다.
      *
      * @param fileDTO name값을 찾을 때 사용될 데이터가 담긴 객체
      * @return 해당 파일의 InputStream
@@ -137,20 +127,18 @@ public class FileService {
     }
 
     /**
-     * 제거될 File의 real_name들을 추리고 제거한다.
+     * 제거될 File의 real_name들을 골라 제거한다.
      *
      * @param fileNames 제거되지 않을 real_name 목록
      * @param boardId   외래키로 갖는 값
      */
     public void removeFileByFileNames(List<String> fileNames, Long boardId) {
-        List<String> existFileNames = fileRepository.findRealName(boardId);
+        List<String> existFileNames = fileRepository.findRealNames(boardId);
         if (existFileNames.isEmpty()) return;
 
         if (!fileNames.isEmpty()) {
             List<String> listToRemove = selectToRemove(fileNames, existFileNames);
-            if (!listToRemove.isEmpty()) {
-                fileRepository.deleteFileByRealNameAndBoardId(listToRemove, boardId);
-            }
+            removeFiles(boardId, listToRemove);
         } else {
             fileRepository.deleteByBoardId(boardId);
         }
@@ -158,21 +146,30 @@ public class FileService {
 
     /**
      * existFileNames에는 존재하지만 fileNames에는 존재하지 않는 이름들의 목록을 리턴한다.
+     * (제거될 파일 이름을 골라낸다.)
+     * 주의: 얕은 복사이다.
      *
      * @param fileNames      제거되지 않을 이름 목록
      * @param existFileNames 기존에 존재하는 이름 목록
      * @return
      */
     private List<String> selectToRemove(List<String> fileNames, List<String> existFileNames) {
-        List<String> result = existFileNames.stream().collect(Collectors.toList());
+        List<String> result = new ArrayList<>(existFileNames);
         for (String fileName : fileNames) {
-            for (String existFileName : result) {
-                if (existFileName.equals(fileName)) {
-                    result.remove(existFileName);
-                    break;
-                }
-            }
+            result.remove(fileName);
         }
         return result;
+    }
+
+    /**
+     * listToRemove에 있는 값 중 boardId를 외래키로 갖고, real_name과 같은 값들을 DB에서 제거한다.
+     *
+     * @param boardId      외래키
+     * @param listToRemove 제거될 real_name 목록
+     */
+    private void removeFiles(Long boardId, List<String> listToRemove) {
+        if (!listToRemove.isEmpty()) {
+            fileRepository.deleteFileByRealNameAndBoardId(listToRemove, boardId);
+        }
     }
 }

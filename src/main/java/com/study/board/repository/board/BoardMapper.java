@@ -1,4 +1,4 @@
-package com.study.board.repository;
+package com.study.board.repository.board;
 
 import org.apache.ibatis.annotations.Mapper;
 

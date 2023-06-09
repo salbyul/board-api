@@ -22,14 +22,14 @@ public class FileController {
     private final FileService fileService;
 
     /**
-     * FileDTO를 받아 해당 File을 1024 버퍼의 크기로 전송한다.
+     * FileDTO를 받아 해당 File을 1024 byte 버퍼의 크기로 전송한다.
      *
      * @param response
      * @param fileDTO
      * @throws IOException
      */
     @GetMapping("/download")
-    public void fileDownload(HttpServletResponse response, FileDTO fileDTO) throws IOException {
+    public void downloadFile(HttpServletResponse response, FileDTO fileDTO) throws IOException {
         FileInputStream fileInputStream = fileService.getFileInputStream(fileDTO);
 
         response.setContentType("application/octet-stream");

@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer, WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
 
     /**
-     * localhost:5173의 접속을 허용한다.
+     * localhost:5173로 부터의 CORS 정책을 허용한다.
      *
      * @param registry
      */

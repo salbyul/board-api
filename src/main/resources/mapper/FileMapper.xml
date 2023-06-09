@@ -2,14 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.study.board.repository.FileMapper">
+<mapper namespace="com.study.board.repository.file.FileMapper">
 
     <insert id="save">
         INSERT INTO file (name, real_name, board_id)
         VALUES (#{fileName}, #{realName}, #{boardId})
     </insert>
 
-    <select id="findRealName" resultType="String">
+    <select id="findRealNames" resultType="String">
         SELECT real_name
         FROM file
         WHERE board_id = #{boardId}

@@ -14,4 +14,8 @@ public class CommentDTO {
     private String content;
     private LocalDateTime generationTimestamp;
     private Long boardId;
+
+    public void setGenerationTimestampToNow() {
+        this.generationTimestamp = LocalDateTime.now();
+    }
 }

@@ -1,14 +1,10 @@
 package com.study.board.controller;
 
+import com.study.board.domain.Category;
 import com.study.board.dto.BoardDTO;
-import com.study.board.dto.CommentDTO;
 import com.study.board.dto.SearchCondition;
-import com.study.board.response.board.BoardCreateResponse;
-import com.study.board.response.board.BoardDetailResponse;
-import com.study.board.response.board.BoardModifyResponse;
 import com.study.board.response.board.BoardResponse;
 import com.study.board.service.BoardService;
-import com.study.board.service.CommentService;
 import com.study.board.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,53 +27,72 @@ public class BoardController {
 
     private final BoardService boardService;
     private final FileService fileService;
-    private final CommentService commentService;
 
     /**
-     * 메인 페이지와 연결되어 있다.
-     * SearchCondition을 이용해 BoardListResponse를 만들어 전달한다.
+     * SearchCondition을 이용해 BoardResponse를 만들어 전달한다.
+     * 페이징에 따른 목록과 전체 목록 수, 카테고리 이름 목록이 담겨있다.
      *
-     * @param searchCondition 검색 조건이 담긴 객체
+     * @param condition 검색 조건이 담긴 객체
      * @return
      */
     @GetMapping("/list")
-    public BoardResponse getList(SearchCondition searchCondition) {
-        return boardService.getBoardList(searchCondition);
+    public BoardResponse getList(SearchCondition condition) {
+        condition.transformPageToOffset();
+
+        List<BoardDTO> boardDTOs = boardService.getBoardList(condition);
+        Integer boardCounts = boardService.getBoardCounts(condition);
+        List<String> categoryNames = boardService.getCategoryNames();
+        return BoardResponse.builder()
+                .boardDTOsForList(boardDTOs)
+                .boardCounts(boardCounts)
+                .categoryNames(categoryNames)
+                .build();
     }
 
     /**
-     * 게시글을 작성하기 위한 페이지에 카테고리 목록을 전달한다.
+     * 카테고리 목록을 BoardResponse에 담아 전달한다.
      *
      * @return
      */
     @GetMapping("/create")
     public BoardResponse getCategories() {
-        return new BoardCreateResponse(boardService.getCategories());
-    }
-
-    @PutMapping("/create")
-    public BoardResponse createBoard(@Validated @RequestPart("boardCreateDTO") BoardCreateDTO boardCreateDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
-        Long boardId = boardService.saveBoard(boardCreateDTO);
-        fileService.saveFiles(files, boardId);
-        return new BoardCreateResponse(boardId);
+        List<Category> categories = boardService.getCategories();
+        return BoardResponse.builder()
+                .categories(categories)
+                .build();
     }
 
     /**
-     * 해당 boardId를 Primary Key로 갖는 게시글의 정보를 담은 BoardDTO 객체를 전달한다.
+     * boardCreateDTO를 이용해 Board를 DB에 저장, files를 이용해 파일들을 로컬에 저장, DB에 저장한다.
+     *
+     * @param boardCreateDTO 사용자가 입력한 Board 데이터가 담긴 객체
+     * @param files          사용자가 업로드할 파일들이 담긴 객체
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
+    @PostMapping("/create")
+    public BoardResponse createBoard(@Validated @RequestPart("boardCreateDTO") BoardCreateDTO boardCreateDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
+        Long boardId = boardService.saveBoard(boardCreateDTO);
+        fileService.saveFiles(files, boardId);
+        return BoardResponse.builder()
+                .boardId(boardId)
+                .build();
+    }
+
+    /**
+     * 해당 boardId를 Primary Key로 갖는 게시글의 정보를 담은 BoardDTO 객체를 BoardResponse에 담아 전달한다.
      *
      * @param boardId Board의 Primary Key
      * @return
      */
     @GetMapping("/detail/{boardId}")
-    public BoardResponse detail(@PathVariable Long boardId) {
+    public BoardResponse getBoardDetail(@PathVariable Long boardId) {
         BoardDTO boardDetail = boardService.getBoardDetail(boardId);
-        List<String> fileRealNames = fileService.getFileRealNames(boardId);
-        List<CommentDTO> commentDetailDTOs = commentService.getCommentDetailDTOs(boardId);
-
-        boardDetail.setFileNames(fileRealNames);
-        boardDetail.setCommentDTOs(commentDetailDTOs);
         boardService.updateViews(boardId);
-        return new BoardDetailResponse(boardDetail);
+        return BoardResponse.builder()
+                .boardDetail(boardDetail)
+                .build();
     }
 
     /**
@@ -89,37 +104,57 @@ public class BoardController {
      * @throws NoSuchAlgorithmException
      */
     @DeleteMapping("/delete/{boardId}")
-    public ResponseEntity delete(@PathVariable Long boardId, String password) throws NoSuchAlgorithmException {
+    public ResponseEntity deleteBoard(@PathVariable Long boardId, String password) throws NoSuchAlgorithmException {
         boardService.checkPassword(boardId, password);
         boardService.deleteBoard(boardId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/modify")
-    public BoardResponse checkPasswordForModification(Long boardId, String password) throws NoSuchAlgorithmException {
+    /**
+     * 게시글 수정을 위해 입력한 비밀번호가 맞는지 확인한다.
+     *
+     * @param boardId  수정될 게시글의 Primary Key
+     * @param password 사용자가 입력한 비밀번호
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    @PutMapping("/modify")
+    public ResponseEntity checkPasswordForModification(Long boardId, String password) throws NoSuchAlgorithmException {
         boardService.checkPassword(boardId, password);
-        String encryptedPassword = boardService.getEncryptedPassword(password);
-        return new BoardModifyResponse(encryptedPassword);
+        return ResponseEntity.ok().build();
     }
 
+    /**
+     * 수정을 위해 기존의 데이터들을 갖고 있는 BoardDTO를 BoardResponse에 담아 전달한다.
+     *
+     * @param boardId 수정될 게시글의 Primary Key
+     * @return
+     */
     @GetMapping("/modify/{boardId}")
-    public BoardResponse getDTOForModification(@PathVariable Long boardId, String encryptedPassword) {
-        boardService.checkEncryptedPassword(boardId, encryptedPassword);
+    public BoardResponse getDTOForModification(@PathVariable Long boardId) {
         BoardDTO boardDTO = boardService.getDetailForModification(boardId);
-        return new BoardDetailResponse(boardDTO);
+        return BoardResponse.builder()
+                .boardDetail(boardDTO)
+                .build();
     }
 
-    @PostMapping("/modify/{boardId}")
-    public BoardResponse modifyBoard(@PathVariable Long boardId, @Validated @RequestPart BoardModifyDTO boardModifyDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
+    /**
+     * 수정된 게시글의 데이터가 담긴 BoardModifyDTO를 받아 해당 게시글을 수정한다.
+     * 마찬가지로 파일의 변경도 확인 후 수정한다.
+     *
+     * @param boardId        수정된 게시글의 Primary Key
+     * @param boardModifyDTO 수정된 게시글의 데이터가 담긴 객체
+     * @param files          새로 등록된 파일목록
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
+    @PutMapping("/modify/{boardId}")
+    public ResponseEntity modifyBoard(@PathVariable Long boardId, @Validated @RequestPart BoardModifyDTO boardModifyDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
         boardService.checkPassword(boardId, boardModifyDTO.getPassword());
         boardService.modifyBoard(boardId, boardModifyDTO);
         fileService.removeFileByFileNames(boardModifyDTO.getFileNames(), boardId);
-        if (files != null) {
-            for (MultipartFile file : files) {
-                System.out.println("file.getOriginalFilename() = " + file.getOriginalFilename());
-            }
-        }
         fileService.saveFiles(files, boardId);
-        return null;
+        return ResponseEntity.ok().build();
     }
 }

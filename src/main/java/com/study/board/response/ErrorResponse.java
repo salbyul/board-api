@@ -33,8 +33,8 @@ public class ErrorResponse {
     private static final Integer PASSWORD_SIZE_CODE = 403;
     public static final String PASSWORD_PATTERN = "Password Pattern";
     private static final Integer PASSWORD_PATTERN_CODE = 404;
-    public static final String PASSWORD_PASSWORD_NOT_EQUAL = "Password Not Equal";
-    private static final Integer PASSWORD_PASSWORD_NOT_EQUAL_CODE = 405;
+    public static final String PASSWORD_NOT_EQUAL = "Password Not Equal";
+    private static final Integer PASSWORD_NOT_EQUAL_CODE = 405;
     public static final String CONTENT_NULL = "Content Null";
     private static final Integer CONTENT_NULL_CODE = 502;
     public static final String CONTENT_SIZE = "Content Size";
@@ -95,8 +95,8 @@ public class ErrorResponse {
             case FILE_NAME_NULL:
                 this.errorCode = FILE_NAME_NULL_CODE;
                 break;
-            case PASSWORD_PASSWORD_NOT_EQUAL:
-                this.errorCode = PASSWORD_PASSWORD_NOT_EQUAL_CODE;
+            case PASSWORD_NOT_EQUAL:
+                this.errorCode = PASSWORD_NOT_EQUAL_CODE;
                 break;
             default:
                 errorCode = 0;

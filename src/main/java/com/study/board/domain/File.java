@@ -1,7 +1,5 @@
 package com.study.board.domain;
 
-//TODO java.io.File 과 같은 이름이라 헷갈린다. Rename?
-
 /**
  * Table: file
  */

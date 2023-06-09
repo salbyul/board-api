@@ -2,7 +2,6 @@ package com.study.board.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -12,7 +11,6 @@ import java.time.LocalDate;
  */
 @Getter
 @Setter
-@ToString
 public class SearchCondition {
 
     private Integer page;
@@ -23,4 +21,8 @@ public class SearchCondition {
     private String category;
     private String search;
     private Integer limit;
+
+    public void transformPageToOffset() {
+        this.page = page * limit;
+    }
 }

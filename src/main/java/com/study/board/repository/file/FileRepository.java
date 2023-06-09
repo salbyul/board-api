@@ -1,4 +1,4 @@
-package com.study.board.repository;
+package com.study.board.repository.file;
 
 import com.study.board.dto.FileDTO;
 
@@ -14,15 +14,16 @@ public interface FileRepository {
     void save(FileDTO fileDTO);
 
     /**
-     * 인수로 들어온 값을 외래키로 갖고 있는 File들의 real_name 레코드값들을 List 형태로 리턴한다.
+     * boardId를 외래키로 갖고 있는 File들의 real_name 레코드값들을 List 형태로 리턴한다.
      *
      * @param boardId Board의 Primary Key
      * @return real_name List
      */
-    List<String> findRealName(Long boardId);
+    List<String> findRealNames(Long boardId);
 
     /**
-     * Board의 Primary Key와 File의 real_name 을 이용해 file_name 값을 찾아 리턴한다.
+     * FileDTO에 담긴 boardId를 외래키로, realName을 real_name으로 갖고 있는 레코드를 찾아,
+     * 해당 레코드의 fileName을 리턴한다.
      *
      * @param fileDTO
      * @return

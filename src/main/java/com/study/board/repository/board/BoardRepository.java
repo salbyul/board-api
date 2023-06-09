@@ -1,4 +1,4 @@
-package com.study.board.repository;
+package com.study.board.repository.board;
 
 import com.study.board.domain.Category;
 import com.study.board.dto.BoardDTO;
@@ -18,7 +18,7 @@ public interface BoardRepository {
     List<String> findAllCategoryNames();
 
     /**
-     * 검색 조건을 이용해 메인 페이지에 나타낼 데이터가 담긴 BoardDTO 객체를 리턴한다.
+     * 검색 조건을 이용해 목록으로서 나타날 데이터가 담긴 BoardDTO 객체를 리턴한다.
      *
      * @param condition 검색 조건이 담긴 객체
      * @return BoardDTO가 담긴 리스트
@@ -26,7 +26,7 @@ public interface BoardRepository {
     List<BoardDTO> findSmallBySearchCondition(SearchCondition condition);
 
     /**
-     * 검색 조건을 이용해 나온 결과의 수를 리턴한다.
+     * 검색 조건을 이용해 나온 결과의 수를 리턴한다. (페이징 조건 제외)
      *
      * @param condition 검색 조건이 담긴 객체
      * @return 검색 결과
@@ -83,7 +83,7 @@ public interface BoardRepository {
      * @param boardId Board의 Primary Key
      * @return
      */
-    BoardDTO findDetailForModificationByBoardId(Long boardId);
+    BoardDTO findDTOForModificationByBoardId(Long boardId);
 
 
     /**

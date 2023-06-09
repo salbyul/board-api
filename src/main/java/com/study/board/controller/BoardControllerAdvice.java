@@ -19,18 +19,21 @@ import static com.study.board.response.ErrorResponse.*;
 public class BoardControllerAdvice {
 
     /**
-     * Validation 과정에서 발생한 Exception
+     * Board Validation 과정에서 발생한 Exception
      *
      * @param e
      * @return
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ErrorResponse validationFailed(MethodArgumentNotValidException e) {
+    public ErrorResponse HandleValidationFailed(MethodArgumentNotValidException e) {
         BindingResult bindingResult = e.getBindingResult();
-        log.error("ERROR: [{}]", bindingResult.getFieldError().getDefaultMessage());
-        if (bindingResult.hasErrors()) {
-            return new ErrorResponse(bindingResult.getFieldError().getDefaultMessage());
+
+        if (bindingResult.getFieldError().getDefaultMessage() != null) {
+            log.error("ERROR: [{}]", bindingResult.getFieldError().getDefaultMessage());
+            if (bindingResult.hasErrors()) {
+                return new ErrorResponse(bindingResult.getFieldError().getDefaultMessage());
+            }
         }
 
 //        파악 안된 Exception
@@ -46,13 +49,13 @@ public class BoardControllerAdvice {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IllegalArgumentException.class)
-    public ErrorResponse IllegalArgumentExceptionHandler(IllegalArgumentException e) {
-        if (e.getMessage().equals("File Null Name")) {
+    public ErrorResponse HandleIllegalArgumentException(IllegalArgumentException e) {
+        if (e.getMessage().equals(FILE_NAME_NULL)) {
             return new ErrorResponse(FILE_NAME_NULL);
-        } else if (e.getMessage().equals("File Null Name")) {
+        } else if (e.getMessage().equals(FILE_NULL)) {
             return new ErrorResponse(FILE_NULL);
-        } else if (e.getMessage().equals("Password Not Equal")) {
-            return new ErrorResponse(PASSWORD_PASSWORD_NOT_EQUAL);
+        } else if (e.getMessage().equals(PASSWORD_NOT_EQUAL)) {
+            return new ErrorResponse(PASSWORD_NOT_EQUAL);
         }
 
 //        파악 안된 Exception
@@ -68,7 +71,7 @@ public class BoardControllerAdvice {
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(IOException.class)
-    public ErrorResponse IOExceptionHandler(IOException e) {
+    public ErrorResponse HandleIOException(IOException e) {
         e.printStackTrace();
         return new ErrorResponse();
     }
@@ -81,7 +84,7 @@ public class BoardControllerAdvice {
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(NoSuchAlgorithmException.class)
-    public ErrorResponse NoSuchAlgorithmExceptionHandler(NoSuchAlgorithmException e) {
+    public ErrorResponse HandleNoSuchAlgorithmException(NoSuchAlgorithmException e) {
         e.printStackTrace();
         return new ErrorResponse();
     }

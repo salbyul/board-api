@@ -1,12 +1,10 @@
 package com.study.board.service;
 
 import com.study.board.dto.CommentDTO;
-import com.study.board.repository.CommentRepository;
+import com.study.board.repository.comment.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -16,12 +14,13 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     /**
-     * Board의 Primary Key를 외래키로 갖고 있는 CommentDTO를 리스트 형태로 리턴한다.
+     * CommentDTO의 생성 시각을 현재 시각으로 설정해준 뒤,
+     * CommentDTO에 담긴 데이터를 DB에 저장한다.
      *
-     * @param boardId Board의 Primary Key
-     * @return
+     * @param commentDTO 사용자가 입력한 값이 담긴 객체
      */
-    public List<CommentDTO> getCommentDetailDTOs(Long boardId) {
-        return commentRepository.findDetailByBoardId(boardId);
+    public void saveComment(CommentDTO commentDTO) {
+        commentDTO.setGenerationTimestampToNow();
+        commentRepository.saveComment(commentDTO);
     }
 }
