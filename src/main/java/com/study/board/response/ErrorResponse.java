@@ -40,9 +40,9 @@ public class ErrorResponse {
     public static final String CONTENT_SIZE = "Content Size";
     private static final Integer CONTENT_SIZE_CODE = 503;
     public static final String FILE_NULL = "File Null";
-    public static final Integer FILE_NULL_CODE = 602;
+    private static final Integer FILE_NULL_CODE = 602;
     public static final String FILE_NAME_NULL = "File Null Name";
-    public static final Integer FILE_NAME_NULL_CODE = 612;
+    private static final Integer FILE_NAME_NULL_CODE = 612;
 
 
     private final int errorCode;
